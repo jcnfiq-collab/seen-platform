@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
+<title>SEEN TV</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#111;
+font-family:Arial;
+color:white;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+background:#000;
+position:sticky;
+top:0;
+z-index:100;
+}
+
+.logo{
+font-size:28px;
+font-weight:bold;
+color:red;
+}
+
+.search-box input{
+padding:10px;
+width:250px;
+border:none;
+border-radius:5px;
+outline:none;
+}
+
+.banner{
+height:400px;
+background:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200') center/cover;
+display:flex;
+align-items:flex-end;
+padding:40px;
+font-size:40px;
+font-weight:bold;
+}
+
+.movies{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:20px;
+padding:20px;
+}
+
+.movie{
+transition:0.3s;
+cursor:pointer;
+}
+
+.movie:hover{
+transform:scale(1.05);
+}
+
+.movie img{
+width:100%;
+border-radius:10px;
+}
+
+.movie h3{
+font-size:16px;
+margin-top:10px;
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.modal-content{
+background:#222;
+padding:20px;
+border-radius:10px;
+max-width:700px;
+width:100%;
+}
+
+.close{
+float:right;
+font-size:30px;
+cursor:pointer;
+}
+
+.modal img{
+width:200px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+@media(max-width:600px){
+
+.banner{
+height:250px;
+font-size:28px;
+}
+
+.search-box input{
+width:150px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">SEEN TV</div>
+
+<div class="search-box">
+<input type="text" id="search" placeholder="Search movies...">
+</div>
+
+</header>
+
+<div class="banner">
+Unlimited Movies & TV Shows
+</div>
+
+<div class="movies" id="movies"></div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+
+<span class="close" id="close">&times;</span>
+
+<div id="modalData"></div>
+
+</div>
+</div>
+
+<script>
+
+const API_KEY = 1f5aac4dac0180e497f81faccba74c99
+
+const moviesContainer = document.getElementById("movies");
+const searchInput = document.getElementById("search");
+
+async function getMovies(url){
+
+const res = await fetch(url);
+const data = await res.json();
+
+showMovies(data.results);
+
+}
+
+function showMovies(movies){
+
+moviesContainer.innerHTML = "";
+
+movies.forEach(movie => {
+
+const poster =
+"https://image.tmdb.org/t/p/w500" + movie.poster_path;
+
+const movieEl = document.createElement("div");
+
+movieEl.classList.add("movie");
+
+movieEl.innerHTML = `
+
+<img src="${poster}" alt="${movie.title}">
+
+<h3>${movie.title}</h3>
+
+`;
+
+movieEl.addEventListener("click", () => {
+
+openMovie(movie);
+
+});
+
+moviesContainer.appendChild(movieEl);
+
+});
+
+}
+
+function openMovie(movie){
+
+document.getElementById("modal").style.display = "flex";
+
+const poster =
+"https://image.tmdb.org/t/p/w500" + movie.poster_path;
+
+document.getElementById("modalData").innerHTML = `
+
+<img src="${poster}">
+
+<h2>${movie.title}</h2>
+
+<br>
+
+<p>${movie.overview}</p>
+
+<br>
+
+<p>⭐ ${movie.vote_average}</p>
+
+`;
+
+}
+
+document.getElementById("close").onclick = () => {
+
+document.getElementById("modal").style.display = "none";
+
+};
+
+searchInput.addEventListener("keyup", (e)=>{
+
+const value = e.target.value;
+
+if(value){
+
+getMovies(
+`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${value}`
+);
+
+}else{
+
+loadPopular();
+
+}
+
+});
+
+function loadPopular(){
+
+getMovies(
+`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`
+);
+
+}
+
+loadPopular();
+
+</script>
+
+</body>
+</html>
